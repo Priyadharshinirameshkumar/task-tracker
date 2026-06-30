@@ -17,65 +17,224 @@ export interface Task {
 }
 
 // ======================================
-// Tasks Array
+// Task Manager Class
 // ======================================
 
-export let tasks: Task[] = [];
+export class TaskManager {
 
-// ======================================
-// Add Task
-// ======================================
+    // Private task array
+    private tasks: Task[] = [];
 
-export function addTask(
+    constructor() {
 
-    name: string,
+        this.load();
 
-    priority: "Low" | "Medium" | "High",
+    }
 
-    dueDate: string
+    // -------------------------------
+    // Add Task
+    // -------------------------------
 
-): Task {
+    add(
+        data: Omit<Task, "id" | "done">
+    ): Task {
 
-    const task: Task = {
+        const task: Task = {
 
-        id: Date.now(),
+            id: Date.now(),
 
-        name,
+            done: false,
 
-        priority,
+            ...data
 
-        dueDate,
+        };
 
-        done: false
+        this.tasks.push(task);
 
-    };
+        this.save();
 
-    tasks.push(task);
+        return task;
 
-    return task;
+    }
+
+    // -------------------------------
+    // Get All Tasks
+    // -------------------------------
+
+    getAll(): Task[] {
+
+        return this.tasks;
+
+    }
+
+    // -------------------------------
+    // Toggle Done
+    // -------------------------------
+
+    toggle(id: number): void {
+
+        const task = this.tasks.find(
+
+            task => task.id === id
+
+        );
+
+        if (task) {
+
+            task.done = !task.done;
+
+            this.save();
+
+        }
+
+    }
+
+    // -------------------------------
+    // Filter Tasks
+    // -------------------------------
+
+    filter(
+        status: "all" | "done" | "pending"
+    ): Task[] {
+
+        if (status === "done") {
+
+            return this.tasks.filter(
+
+                task => task.done
+
+            );
+
+        }
+
+        if (status === "pending") {
+
+            return this.tasks.filter(
+
+                task => !task.done
+
+            );
+
+        }
+
+        return this.tasks;
+
+    }
+
+    // -------------------------------
+    // Sort Tasks
+    // -------------------------------
+
+    sortBy(
+        field: keyof Pick<Task, "priority" | "dueDate">
+    ): Task[] {
+
+        const copy = [...this.tasks];
+
+        if (field === "priority") {
+
+            const order = {
+
+                High: 3,
+
+                Medium: 2,
+
+                Low: 1
+
+            };
+
+            copy.sort(
+
+                (a, b) =>
+
+                order[b.priority] - order[a.priority]
+
+            );
+
+        }
+
+        if (field === "dueDate") {
+
+            copy.sort(
+
+                (a, b) =>
+
+                a.dueDate.localeCompare(b.dueDate)
+
+            );
+
+        }
+
+        return copy;
+
+    }
+
+    // -------------------------------
+    // Save
+    // -------------------------------
+
+    private save(): void {
+
+        localStorage.setItem(
+
+            "tasks",
+
+            JSON.stringify(this.tasks)
+
+        );
+
+    }
+
+    // -------------------------------
+    // Load
+    // -------------------------------
+
+    load(): void {
+
+        const stored =
+
+            localStorage.getItem("tasks");
+
+        if (stored) {
+
+            this.tasks = JSON.parse(stored);
+
+        }
+
+    }
 
 }
 
 // ======================================
-// Toggle Done
+// Generic Group By
 // ======================================
 
-export function toggleDone(
+export function groupBy<T>(
 
-    id: number
+    items: T[],
 
-): void {
+    key: keyof T
 
-    const task = tasks.find(
+): Record<string, T[]> {
 
-        task => task.id === id
+    const groups: Record<string, T[]> = {};
 
-    );
+    items.forEach(item => {
 
-    if (task) {
+        const groupKey =
 
-        task.done = !task.done;
+            String(item[key]);
 
-    }
+        if (!groups[groupKey]) {
+
+            groups[groupKey] = [];
+
+        }
+
+        groups[groupKey].push(item);
+
+    });
+
+    return groups;
 
 }

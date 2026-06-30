@@ -1,0 +1,24 @@
+{
+  "name": "task-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Priyadharshinirameshkumar/task-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Priyadharshinirameshkumar/task-tracker/issues"
+  },
+  "homepage": "https://github.com/Priyadharshinirameshkumar/task-tracker#readme",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

@@ -76,6 +76,31 @@ export class TaskManager {
         localStorage.setItem("tasks", JSON.stringify(this.tasks));
     }
     // -------------------------------
+    // Clear All Tasks
+    // -------------------------------
+    clear() {
+        this.tasks = [];
+        this.save();
+    }
+    // -------------------------------
+    // Get Tasks By Filter and Sort
+    // -------------------------------
+    getFilteredAndSorted(status, sortField) {
+        let result = this.filter(status);
+        if (sortField === "priority") {
+            const order = {
+                High: 3,
+                Medium: 2,
+                Low: 1
+            };
+            result.sort((a, b) => order[b.priority] - order[a.priority]);
+        }
+        if (sortField === "dueDate") {
+            result.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+        }
+        return result;
+    }
+    // -------------------------------
     // Load
     // -------------------------------
     load() {

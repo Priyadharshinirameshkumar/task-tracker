@@ -1,3 +1,11 @@
+import { TaskManager, groupBy } from "./tasks.js";
+
+// ======================================
+// Create Task Manager
+// ======================================
+
+const manager = new TaskManager();
+
 // ======================================
 // Select HTML Elements
 // ======================================
@@ -13,32 +21,19 @@ const clearAllButton = document.querySelector("#clear-all");
 
 const allButton = document.querySelector("#all-btn");
 const pendingButton = document.querySelector("#pending-btn");
-const doneFilterButton = document.querySelector("#done-btn");
+const doneButton = document.querySelector("#done-btn");
 
 const sortSelect = document.querySelector("#sort");
 
 const taskCounter = document.querySelector("#task-counter");
 
-// ======================================
-// Store Tasks
-// ======================================
+const summaryBody = document.querySelector("#summary-body");
 
-let tasks = [];
+// ======================================
+// Current Filter
+// ======================================
 
 let currentFilter = "all";
-
-// ======================================
-// Save Tasks
-// ======================================
-
-function saveTasks() {
-
-    localStorage.setItem(
-        "tasks",
-        JSON.stringify(tasks)
-    );
-
-}
 
 // ======================================
 // Render Tasks
@@ -48,63 +43,18 @@ function renderTasks() {
 
     taskList.innerHTML = "";
 
-    let filteredTasks = tasks;
-if (sortSelect.value === "dueDate") {
+    summaryBody.innerHTML = "";
 
-    filteredTasks.sort(function(a,b){
+    let tasks = manager.getFilteredAndSorted(
+        currentFilter,
+        sortSelect.value
+    );
 
-        return new Date(a.dueDate)
-            - new Date(b.dueDate);
-
-    });
-
-}
-if (sortSelect.value === "priority") {
-
-    const order = {
-
-        High:3,
-
-        Medium:2,
-
-        Low:1
-
-    };
-
-    filteredTasks.sort(function(a,b){
-
-        return order[b.priority]
-            - order[a.priority];
-
-    });
-
-}
-    if (currentFilter === "pending") {
-
-        filteredTasks = tasks.filter(function (task) {
-
-            return !task.done;
-
-        });
-
-    }
-
-    if (currentFilter === "done") {
-
-        filteredTasks = tasks.filter(function (task) {
-
-            return task.done;
-
-        });
-
-    }
-
-    filteredTasks.forEach(function (task) {
+    tasks.forEach(function (task) {
 
         const listItem = document.createElement("li");
 
-        const today =
-            new Date().toISOString().split("T")[0];
+        const today = new Date().toISOString().split("T")[0];
 
         if (task.dueDate <= today && !task.done) {
 
@@ -115,20 +65,21 @@ if (sortSelect.value === "priority") {
         listItem.textContent =
             `${task.name} | ${task.priority} | ${task.dueDate} `;
 
-        const doneButton =
-            document.createElement("button");
+        const doneBtn = document.createElement("button");
 
-        doneButton.textContent = "Done";
+        doneBtn.textContent = task.done
+            ? "Undo"
+            : "Done";
 
-        doneButton.addEventListener("click", function () {
+        doneBtn.addEventListener("click", function () {
 
-        task.done = !task.done;
+            manager.toggle(task.id);
 
-saveTasks();
-
-renderTasks();
+            renderTasks();
 
         });
+
+        listItem.appendChild(doneBtn);
 
         if (task.done) {
 
@@ -136,34 +87,39 @@ renderTasks();
 
         }
 
-        listItem.appendChild(doneButton);
-
         taskList.appendChild(listItem);
 
     });
 
     taskCounter.textContent =
-        `Showing ${filteredTasks.length} of ${tasks.length} tasks`;
+        `Showing ${tasks.length} of ${manager.getAll().length} tasks`;
+
+    const grouped = groupBy(
+        manager.getAll(),
+        "priority"
+    );
+
+    Object.keys(grouped).forEach(function (priority) {
+
+        grouped[priority].forEach(function (task) {
+
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${task.name}</td>
+                <td>${task.priority}</td>
+                <td>${task.dueDate}</td>
+                <td>${task.done ? "Done" : "Pending"}</td>
+            `;
+
+            summaryBody.appendChild(row);
+
+        });
+
+    });
 
 }
-// ======================================
-// Load Tasks
-// ======================================
 
-function loadTasks() {
-
-    const storedTasks =
-        localStorage.getItem("tasks");
-
-    if (storedTasks) {
-
-        tasks = JSON.parse(storedTasks);
-
-    }
-
-    renderTasks();
-
-}
 // ======================================
 // Add Task
 // ======================================
@@ -172,27 +128,33 @@ taskForm.addEventListener("submit", function (event) {
 
     event.preventDefault();
 
-    const task = {
+    const name = taskNameInput.value.trim();
 
-        id: Date.now(),
+    const priority = priorityInput.value;
 
-        name: taskNameInput.value,
+    const dueDate = dueDateInput.value;
 
-        priority: priorityInput.value,
+    if (name === "") {
 
-        dueDate: dueDateInput.value,
+        alert("Please enter a task name.");
 
-        done: false
+        return;
 
-    };
+    }
 
-  tasks.push(task);
+    manager.add({
 
-saveTasks();
+        name,
 
-renderTasks();
+        priority,
 
-taskForm.reset();
+        dueDate
+
+    });
+
+    renderTasks();
+
+    taskForm.reset();
 
 });
 
@@ -201,16 +163,19 @@ taskForm.reset();
 // ======================================
 
 clearAllButton.addEventListener("click", function () {
-tasks = [];
 
-saveTasks();
+    if (confirm("Are you sure you want to clear all tasks?")) {
 
-renderTasks();
+        manager.clear();
+
+        renderTasks();
+
+    }
 
 });
 
 // ======================================
-// Filters
+// Filter Buttons
 // ======================================
 
 allButton.addEventListener("click", function () {
@@ -229,16 +194,26 @@ pendingButton.addEventListener("click", function () {
 
 });
 
-doneFilterButton.addEventListener("click", function () {
+doneButton.addEventListener("click", function () {
 
     currentFilter = "done";
 
     renderTasks();
 
 });
-loadTasks();
-sortSelect.addEventListener("change", function(){
+
+// ======================================
+// Sort Dropdown
+// ======================================
+
+sortSelect.addEventListener("change", function () {
 
     renderTasks();
 
 });
+
+// ======================================
+// Initial Render
+// ======================================
+
+renderTasks();

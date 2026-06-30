@@ -184,6 +184,62 @@ export class TaskManager {
         );
 
     }
+    // -------------------------------
+// Clear All Tasks
+// -------------------------------
+
+clear(): void {
+
+    this.tasks = [];
+
+    this.save();
+
+}
+
+// -------------------------------
+// Get Tasks By Filter and Sort
+// -------------------------------
+
+getFilteredAndSorted(
+    status: "all" | "done" | "pending",
+    sortField: string
+): Task[] {
+
+    let result = this.filter(status);
+
+    if (sortField === "priority") {
+
+        const order = {
+
+            High: 3,
+
+            Medium: 2,
+
+            Low: 1
+
+        };
+
+        result.sort(
+
+            (a, b) => order[b.priority] - order[a.priority]
+
+        );
+
+    }
+
+    if (sortField === "dueDate") {
+
+        result.sort(
+
+            (a, b) => a.dueDate.localeCompare(b.dueDate)
+
+        );
+
+    }
+
+    return result;
+
+}
 
     // -------------------------------
     // Load

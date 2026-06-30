@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Task Tracker</title>
 
     <link rel="stylesheet" href="style.css">
@@ -17,7 +19,8 @@
 
     <main>
 
-        <!-- Task Form -->
+        <!-- Add Task Form -->
+
         <section>
 
             <h2>Add New Task</h2>
@@ -37,6 +40,8 @@
 
                 </div>
 
+                <br>
+
                 <div>
 
                     <label for="priority">
@@ -44,18 +49,17 @@
                     </label>
 
                     <select
-                        id="priority"
-                        required>
+                        id="priority">
 
-                        <option value="Low">Low</option>
-
-                        <option value="Medium">Medium</option>
-
-                        <option value="High">High</option>
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
 
                     </select>
 
                 </div>
+
+                <br>
 
                 <div>
 
@@ -70,6 +74,8 @@
 
                 </div>
 
+                <br>
+
                 <button type="submit">
                     Add Task
                 </button>
@@ -78,27 +84,91 @@
 
         </section>
 
+        <hr>
+
         <!-- Task List -->
+
         <section>
 
             <h2>Task List</h2>
+
+            <!-- Filter Buttons -->
+
+            <div>
+
+                <button id="all-btn">
+                    All
+                </button>
+
+                <button id="pending-btn">
+                    Pending
+                </button>
+
+                <button id="done-btn">
+                    Done
+                </button>
+
+            </div>
+
+            <br>
+
+            <!-- Sort -->
+
+            <label for="sort">
+
+                Sort By
+
+            </label>
+
+            <select id="sort">
+
+                <option value="priority">
+
+                    By Priority
+
+                </option>
+
+                <option value="dueDate">
+
+                    By Due Date
+
+                </option>
+
+            </select>
+
+            <br><br>
+
+            <!-- Counter -->
+
+            <p id="task-counter">
+
+                Showing 0 of 0 tasks
+
+            </p>
+
+            <!-- Tasks -->
 
             <ul id="task-list">
 
             </ul>
 
             <button id="clear-all">
+
                 Clear All
+
             </button>
 
         </section>
 
+        <hr>
+
         <!-- Summary Table -->
+
         <section>
 
             <h2>Task Summary</h2>
 
-            <table>
+            <table border="1">
 
                 <thead>
 
@@ -129,7 +199,9 @@
     <footer>
 
         <p>
+
             © 2026 Task Tracker
+
         </p>
 
     </footer>
